@@ -1,3 +1,3 @@
 export default function NotFound() {
-    return <h1 className="text-center mt-10 text-2xl">Ah gars! elle existe pas ta page là.</h1>
+    return <h1 className="text-center mt-10 text-2xl">Sorry, the Booty Bandit is not here...</h1>
 }
