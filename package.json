@@ -1,0 +1,25 @@
+{
+  "name": "epigimp",
+  "version": "1.0.0",
+  "description": "EpiGimp est une application web d’édition d’images inspirée du logiciel libre GIMP. Le projet vise à offrir une expérience utilisateur moderne et simplifiée permettant de réaliser des opérations de base de retouche photo (recadrage, filtres, réglages de couleur, dessin, gestion des calques) directement depuis un navigateur web.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm --prefix client run dev\" \"npm --prefix server run dev\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cauyatech/EpiGimp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/cauyatech/EpiGimp/issues"
+  },
+  "homepage": "https://github.com/cauyatech/EpiGimp#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
