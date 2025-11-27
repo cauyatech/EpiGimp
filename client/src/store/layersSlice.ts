@@ -6,7 +6,7 @@ export interface Layer {
   name: string;
   visible: boolean;
   opacity: number;
-  imageData: string | null; // Base64 ou data URL
+  imageData: string | null;
 }
 
 interface LayersState {
