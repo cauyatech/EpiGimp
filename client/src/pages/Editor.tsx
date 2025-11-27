@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Toolbar from "../components/Toolbar/Toolbar";
 import CanvasEditor from "../components/CanvasEditor/CanvasEditor";
-// import LayerPanel from "../components/CanvasEditor/LayerPanel";
+import LayerPanel from "../components/CanvasEditor/LayerPanel";
 
 export default function Editor() {
   return (
