@@ -7,10 +7,11 @@
   line-height: 1.5;
   font-weight: 400;
 
-  font-synthesis: none;
+  color-scheme: dark;
+  /* font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale; */
 }
 
 * {
@@ -23,6 +24,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #2e2e2e;
+  color: #e5e7eb;
 }
 
 #root {
@@ -31,24 +34,72 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #2e2e2e;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: #505050;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #606060;
 }
 
 button, a {
   transition: all 0.2s ease-in-out;
 }
 
+/* Style personnalisé pour les range sliders style GIMP */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: #1a1a1a;
+  border-radius: 2px;
+  height: 0.375rem;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 2px;
+  background: #4a90e2;
+  cursor: pointer;
+  border: 1px solid #1a1a1a;
+  transition: all 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #5ba3f5;
+}
+
+input[type="range"]::-moz-range-track {
+  background: #1a1a1a;
+  border-radius: 2px;
+  height: 0.375rem;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 2px;
+  background: #4a90e2;
+  cursor: pointer;
+  border: 1px solid #1a1a1a;
+  transition: all 0.15s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background: #5ba3f5;
+}

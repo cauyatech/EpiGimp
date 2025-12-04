@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store';
-import { addLayer, removeLayer, selectLayer, toggleLayerVisibility } from '../../store/layersSlice';
+import { addLayer, removeLayer, selectLayer, toggleLayerVisibility, setLayerOpacity } from '../../store/layersSlice';
 
 export default function LayerPanel() {
   const dispatch = useDispatch();
@@ -11,73 +11,82 @@ export default function LayerPanel() {
     dispatch(addLayer({ name: layerName }));
   };
 
-  const handleRemoveLayer = (layerId: string) => {
-    if (layers.length > 1) {
-      dispatch(removeLayer(layerId));
-    }
-  };
-
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Calques</h2>
+    <div className="h-full flex flex-col bg-[#3c3c3c] text-gray-200">
+      <div className="p-2 border-b border-[#1a1a1a] flex items-center justify-between bg-[#3c3c3c]">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-gray-300">Calques</h2>
         <button
           onClick={handleAddLayer}
-          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+          className="px-2 py-1 bg-[#2e2e2e] hover:bg-[#505050] text-gray-300 rounded border border-[#1a1a1a] transition-colors flex items-center gap-1 text-xs"
+          title="Nouveau calque"
         >
-          + Nouveau
+          <span>➕</span>
+          <span>Nouveau</span>
         </button>
       </div>
 
-      <div className="flex-1 overflow-auto space-y-2">
-        {layers.map((layer) => (
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {[...layers].reverse().map((layer) => (
           <div
             key={layer.id}
             onClick={() => dispatch(selectLayer(layer.id))}
-            className={`p-3 border rounded cursor-pointer transition-all ${
+            className={`group p-2 rounded cursor-pointer border transition-all select-none ${
               selectedLayerId === layer.id
-                ? 'bg-blue-100 border-blue-500'
-                : 'bg-gray-50 border-gray-300 hover:bg-gray-100'
+                ? 'bg-[#4a90e2] border-[#4a90e2]'
+                : 'bg-[#2e2e2e] border-[#1a1a1a] hover:bg-[#3c3c3c] hover:border-[#505050]'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 flex-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    dispatch(toggleLayerVisibility(layer.id));
-                  }}
-                  className="text-lg"
-                  title={layer.visible ? 'Cacher' : 'Afficher'}
-                >
-                  {layer.visible ? '👁️' : '👁️‍🗨️'}
-                </button>
-                <span className="text-sm font-medium text-gray-700">{layer.name}</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  dispatch(toggleLayerVisibility(layer.id));
+                }}
+                className={`text-sm p-1 rounded transition-all ${
+                  layer.visible 
+                    ? 'hover:bg-[#505050]' 
+                    : 'opacity-50 grayscale'
+                }`}
+              >
+                {layer.visible ? '👁️' : '🚫'}
+              </button>
+              
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium truncate">{layer.name}</div>
               </div>
+
               {layers.length > 1 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleRemoveLayer(layer.id);
+                    if (window.confirm(`Supprimer "${layer.name}" ?`)) {
+                      dispatch(removeLayer(layer.id));
+                    }
                   }}
-                  className="text-red-600 hover:text-red-800 text-sm font-bold"
-                  title="Supprimer le calque"
+                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 p-1 transition-opacity text-xs"
+                  title="Supprimer"
                 >
                   ✕
                 </button>
               )}
             </div>
-            <div className="mt-2">
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={layer.opacity * 100}
-                readOnly
-                className="w-full h-1"
-                title={`Opacité: ${Math.round(layer.opacity * 100)}%`}
-              />
-            </div>
+            
+            {selectedLayerId === layer.id && (
+                <div className="mt-2 flex items-center gap-2">
+                    <span className="text-[10px] text-gray-400">Opacité</span>
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={layer.opacity * 100}
+                        onChange={(e) => dispatch(setLayerOpacity({ id: layer.id, opacity: Number(e.target.value) / 100 }))}
+                        className="flex-1 h-1 bg-[#1a1a1a] rounded cursor-pointer accent-[#4a90e2]"
+                    />
+                    <span className="text-[10px] text-gray-300 min-w-[2rem] text-right">
+                      {Math.round(layer.opacity * 100)}%
+                    </span>
+                </div>
+            )}
           </div>
         ))}
       </div>
