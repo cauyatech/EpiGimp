@@ -1,9 +1,3 @@
-/**
- * CanvasOverlay.tsx
- * Overlay transparent au-dessus des calques pour capturer les événements souris
- * Permet l'interaction sans affecter directement les canvas
- */
-
 interface CanvasOverlayProps {
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseMove: (e: React.MouseEvent) => void;
@@ -40,9 +34,9 @@ export default function CanvasOverlay({
         cursor,
         zIndex: 9999,
         touchAction: 'none',
-        backgroundColor: 'rgba(255, 0, 0, 0.15)', // Debug: teinte rouge visible
-        border: '3px solid red', // Debug: bordure rouge
-        pointerEvents: 'auto', // FORCER la capture des événements
+        backgroundColor: 'rgba(255, 0, 0, 0.15)',
+        border: '3px solid red',
+        pointerEvents: 'auto',
       }}
       title="Click here to draw"
     >

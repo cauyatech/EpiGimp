@@ -1,13 +1,14 @@
 /**
  * EditorLayout.tsx
  * Layout principal de l'éditeur avec architecture en 3 colonnes
- * Structure: ToolbarLeft | CanvasWorkspace | LayersPanel
+ * Structure: ToolbarLeft | CanvasWorkspace | (LayersPanel + FiltersPanel)
  */
 
 import { Link } from "react-router-dom";
 import ToolbarLeft from "./ToolbarLeft";
 import CanvasWorkspace from "./CanvasWorkspace";
 import LayersPanel from "./LayersPanel";
+import FiltersPanel from "./FiltersPanel";
 import TopToolbar from "./TopToolbar";
 
 export default function EditorLayout() {
@@ -31,7 +32,7 @@ export default function EditorLayout() {
       {/* Main workspace avec 3 zones */}
       <main className="flex-1 flex overflow-hidden">
         {/* Barre d'outils gauche (verticale) */}
-        <aside className="w-20 bg-[#252526] border-r border-[#3e3e42] shadow-xl">
+        <aside className="w-36 bg-[#252526] border-r border-[#3e3e42] shadow-xl">
           <ToolbarLeft />
         </aside>
 
@@ -40,9 +41,15 @@ export default function EditorLayout() {
           <CanvasWorkspace />
         </section>
 
-        {/* Panneau des calques à droite */}
-        <aside className="w-80 bg-[#252526] border-l border-[#3e3e42] shadow-xl">
-          <LayersPanel />
+        {/* Panneaux à droite: Calques + Filtres */}
+        <aside className="w-80 bg-[#252526] border-l border-[#3e3e42] shadow-xl flex flex-col">
+          <div className="flex-1 overflow-hidden">
+            <LayersPanel />
+          </div>
+          <div className="h-px bg-[#3e3e42]"></div>
+          <div className="flex-1 overflow-hidden">
+            <FiltersPanel />
+          </div>
         </aside>
       </main>
     </div>

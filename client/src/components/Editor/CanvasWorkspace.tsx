@@ -4,7 +4,7 @@
  * Chaque calque est un canvas séparé, empilés et composés ensemble
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { useDrawingEngine } from '../../hooks/useDrawingEngine';
@@ -15,6 +15,7 @@ export default function CanvasWorkspace() {
   const { layers, selectedLayerId } = useSelector((state: RootState) => state.layers);
   const { canvasWidth, canvasHeight, backgroundColor } = useSelector((state: RootState) => state.project);
   const { selectionRect, cropRect } = useSelector((state: RootState) => state.tools);
+  const [zoom, setZoom] = useState(100);
   
   const { 
     handleMouseDown, 
@@ -23,7 +24,15 @@ export default function CanvasWorkspace() {
     getCursor 
   } = useDrawingEngine(canvasContainerRef);
 
-  // Initialiser le fond blanc du premier calque
+  useEffect(() => {
+    const handleZoom = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setZoom(customEvent.detail.zoom);
+    };
+    window.addEventListener('canvasZoom', handleZoom);
+    return () => window.removeEventListener('canvasZoom', handleZoom);
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       const firstLayer = layers[0];
@@ -56,6 +65,9 @@ export default function CanvasWorkspace() {
           height: canvasHeight,
           position: 'relative',
           overflow: 'hidden',
+          transform: `scale(${zoom / 100})`,
+          transformOrigin: 'center center',
+          transition: 'transform 0.2s ease-out',
         }}
       >
         {/* Fond damier (transparence) */}

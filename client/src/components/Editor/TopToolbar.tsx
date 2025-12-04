@@ -3,15 +3,43 @@
  * Barre d'outils supérieure avec contrôles couleur, taille, et actions
  */
 
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store';
-import { setBrushSize, setColor, triggerClearCanvas } from '../../store/toolsSlice';
+import { setBrushSize, setColor, triggerClearCanvas, setFillShape } from '../../store/toolsSlice';
 import { addLayer } from '../../store/layersSlice';
-import ExportButton from './ExportButton';
+import SaveProjectModal from './SaveProjectModal';
+import LoadProjectModal from './LoadProjectModal';
+import ExportModal from './ExportModal';
+import CanvasSizeModal from './CanvasSizeModal';
 
 export default function TopToolbar() {
   const dispatch = useDispatch();
-  const { brushSize, color } = useSelector((state: RootState) => state.tools);
+  const { brushSize, color, fillShape, activeTool } = useSelector((state: RootState) => state.tools);
+  
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showCanvasSizeModal, setShowCanvasSizeModal] = useState(false);
+  const [zoom, setZoom] = useState(100);
+
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 10, 300));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 10, 10));
+  };
+
+  const handleResetZoom = () => {
+    setZoom(100);
+  };
+
+  // Passer le zoom au workspace via un événement personnalisé
+  useEffect(() => {
+    const event = new CustomEvent('canvasZoom', { detail: { zoom } });
+    window.dispatchEvent(event);
+  }, [zoom]);
 
   const handleImageImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,11 +104,55 @@ export default function TopToolbar() {
         </span>
       </div>
 
+      {/* Fill toggle for shapes */}
+      {(activeTool === 'rectangle' || activeTool === 'circle') && (
+        <div className="flex items-center gap-2 bg-[#1e1e1e] px-3 py-2 rounded-md border border-[#3e3e42]">
+          <input
+            type="checkbox"
+            id="fill-shape"
+            checked={fillShape}
+            onChange={(e) => dispatch(setFillShape(e.target.checked))}
+            className="w-4 h-4 rounded border-gray-600 bg-[#2d2d30] text-[#bb86fc] focus:ring-[#bb86fc] focus:ring-offset-0"
+          />
+          <label htmlFor="fill-shape" className="text-xs font-medium text-gray-400 cursor-pointer">
+            Remplir
+          </label>
+        </div>
+      )}
+
       <div className="flex-1"></div>
 
       {/* Boutons d'action */}
       <div className="flex items-center gap-2">
-        <ExportButton />
+        {/* Save Project */}
+        <button
+          onClick={() => setShowSaveModal(true)}
+          className="px-4 py-2 bg-[#2d2d30] hover:bg-[#3e3e42] text-gray-200 rounded-md transition-all text-sm font-medium flex items-center gap-2 border border-[#3e3e42]"
+          title="Sauvegarder le projet"
+        >
+          <span>💾</span>
+          <span>Sauvegarder</span>
+        </button>
+
+        {/* Load Project */}
+        <button
+          onClick={() => setShowLoadModal(true)}
+          className="px-4 py-2 bg-[#2d2d30] hover:bg-[#3e3e42] text-gray-200 rounded-md transition-all text-sm font-medium flex items-center gap-2 border border-[#3e3e42]"
+          title="Charger un projet"
+        >
+          <span>📁</span>
+          <span>Charger</span>
+        </button>
+
+        {/* Export */}
+        <button
+          onClick={() => setShowExportModal(true)}
+          className="px-4 py-2 bg-[#bb86fc] hover:bg-[#a66efc] text-white rounded-md transition-all text-sm font-medium flex items-center gap-2 border border-[#bb86fc]"
+          title="Exporter l'image"
+        >
+          <span>📥</span>
+          <span>Exporter</span>
+        </button>
 
         <label className="px-4 py-2 bg-[#2d2d30] hover:bg-[#3e3e42] text-gray-200 rounded-md transition-all cursor-pointer text-sm font-medium flex items-center gap-2 border border-[#3e3e42]">
           <span>📂</span>
@@ -94,6 +166,40 @@ export default function TopToolbar() {
         </label>
 
         <button
+          onClick={() => setShowCanvasSizeModal(true)}
+          className="px-4 py-2 bg-[#2d2d30] hover:bg-[#3e3e42] text-gray-200 rounded-md transition-all text-sm font-medium flex items-center gap-2 border border-[#3e3e42]"
+          title="Changer la taille du canvas"
+        >
+          <span>📐</span>
+          <span>Taille</span>
+        </button>
+
+        {/* Contrôles de zoom */}
+        <div className="flex items-center gap-2 px-3 py-1 bg-[#2d2d30] rounded-md border border-[#3e3e42]">
+          <button
+            onClick={handleZoomOut}
+            className="px-2 py-1 hover:bg-[#3e3e42] rounded transition-all text-lg"
+            title="Dézoomer (Ctrl + -)"
+          >
+            🔍−
+          </button>
+          <button
+            onClick={handleResetZoom}
+            className="px-2 py-1 hover:bg-[#3e3e42] rounded transition-all text-xs font-medium min-w-[50px]"
+            title="Réinitialiser (Ctrl + 0)"
+          >
+            {zoom}%
+          </button>
+          <button
+            onClick={handleZoomIn}
+            className="px-2 py-1 hover:bg-[#3e3e42] rounded transition-all text-lg"
+            title="Zoomer (Ctrl + +)"
+          >
+            🔍+
+          </button>
+        </div>
+
+        <button
           onClick={() => {
             if (window.confirm('Voulez-vous vraiment effacer le calque actif ?')) {
               dispatch(triggerClearCanvas());
@@ -105,6 +211,31 @@ export default function TopToolbar() {
           <span>Effacer</span>
         </button>
       </div>
+
+      {/* Modals */}
+      <SaveProjectModal 
+        isOpen={showSaveModal} 
+        onClose={() => setShowSaveModal(false)}
+        onSaved={() => {
+          // Optionally show a success message
+          alert('Projet sauvegardé avec succès!');
+        }}
+      />
+      
+      <LoadProjectModal 
+        isOpen={showLoadModal} 
+        onClose={() => setShowLoadModal(false)}
+      />
+      
+      <ExportModal 
+        isOpen={showExportModal} 
+        onClose={() => setShowExportModal(false)}
+      />
+      
+      <CanvasSizeModal 
+        isOpen={showCanvasSizeModal} 
+        onClose={() => setShowCanvasSizeModal(false)}
+      />
     </div>
   );
 }
