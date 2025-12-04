@@ -75,6 +75,11 @@ const layersSlice = createSlice({
         layer.imageData = action.payload.imageData;
       }
     },
+    reorderLayers: (state, action: PayloadAction<{ fromIndex: number; toIndex: number }>) => {
+      const { fromIndex, toIndex } = action.payload;
+      const [movedLayer] = state.layers.splice(fromIndex, 1);
+      state.layers.splice(toIndex, 0, movedLayer);
+    },
   },
 });
 
@@ -86,6 +91,7 @@ export const {
   setLayerOpacity,
   renameLayer,
   updateLayerData,
+  reorderLayers,
 } = layersSlice.actions;
 
 export default layersSlice.reducer;

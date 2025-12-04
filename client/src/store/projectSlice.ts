@@ -6,6 +6,8 @@ interface ProjectState {
   canvasWidth: number;
   canvasHeight: number;
   backgroundColor: string;
+  importedImage: string | null;
+  imageOffset: { x: number; y: number };
 }
 
 const initialState: ProjectState = {
@@ -13,6 +15,8 @@ const initialState: ProjectState = {
   canvasWidth: 800,
   canvasHeight: 600,
   backgroundColor: '#ffffff',
+  importedImage: null,
+  imageOffset: { x: 0, y: 0 },
 };
 
 const projectSlice = createSlice({
@@ -29,9 +33,15 @@ const projectSlice = createSlice({
     setBackgroundColor: (state, action: PayloadAction<string>) => {
       state.backgroundColor = action.payload;
     },
+    setImportedImage: (state, action: PayloadAction<string | null>) => {
+      state.importedImage = action.payload;
+    },
+    setImageOffset: (state, action: PayloadAction<{ x: number; y: number }>) => {
+      state.imageOffset = action.payload;
+    },
   },
 });
 
-export const { setProjectName, setCanvasSize, setBackgroundColor } = projectSlice.actions;
+export const { setProjectName, setCanvasSize, setBackgroundColor, setImportedImage, setImageOffset } = projectSlice.actions;
 
 export default projectSlice.reducer;
