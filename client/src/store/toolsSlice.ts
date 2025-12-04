@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-export type Tool = 'move' | 'brush' | 'eraser' | 'rectangle' | 'circle' | 'line' | 'select' | 'crop';
+export type Tool = 'move' | 'brush' | 'eraser' | 'rectangle' | 'circle' | 'line' | 'select' | 'crop' | 'colorPicker';
 
 interface ToolsState {
   activeTool: Tool;
@@ -11,6 +11,7 @@ interface ToolsState {
   shouldClearCanvas: boolean;
   selectionRect: { x: number; y: number; width: number; height: number } | null;
   cropRect: { x: number; y: number; width: number; height: number } | null;
+  fillShape: boolean; // for rectangle/circle - filled or stroke only
 }
 
 const initialState: ToolsState = {
@@ -21,6 +22,7 @@ const initialState: ToolsState = {
   shouldClearCanvas: false,
   selectionRect: null,
   cropRect: null,
+  fillShape: false,
 };
 
 const toolsSlice = createSlice({
@@ -51,9 +53,22 @@ const toolsSlice = createSlice({
     setCropRect: (state, action: PayloadAction<{ x: number; y: number; width: number; height: number } | null>) => {
       state.cropRect = action.payload;
     },
+    setFillShape: (state, action: PayloadAction<boolean>) => {
+      state.fillShape = action.payload;
+    },
   },
 });
 
-export const { setActiveTool, setBrushSize, setColor, setEraserSize, triggerClearCanvas, resetClearCanvas, setSelectionRect, setCropRect } = toolsSlice.actions;
+export const { 
+  setActiveTool, 
+  setBrushSize, 
+  setColor, 
+  setEraserSize, 
+  triggerClearCanvas, 
+  resetClearCanvas, 
+  setSelectionRect, 
+  setCropRect,
+  setFillShape 
+} = toolsSlice.actions;
 
 export default toolsSlice.reducer;

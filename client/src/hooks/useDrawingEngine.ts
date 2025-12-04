@@ -11,12 +11,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../store';
 import { 
   resetClearCanvas, 
-  setSelectionRect, 
-  setCropRect 
+  setCropRect,
+  setColor 
 } from '../store/toolsSlice';
-import { setImageOffset } from '../store/projectSlice';
 
-export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
+export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement | null>) => {
   const dispatch = useDispatch();
   
   // Refs pour le tracking
@@ -24,15 +23,13 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
   const lastPos = useRef<{ x: number; y: number } | null>(null);
   const startPos = useRef<{ x: number; y: number } | null>(null);
   const savedImageData = useRef<ImageData | null>(null);
-  const isDragging = useRef(false);
-  const dragStart = useRef<{ x: number; y: number } | null>(null);
   const pathPoints = useRef<{ x: number; y: number }[]>([]);
 
   // Selectors Redux
-  const { activeTool, brushSize, color, eraserSize, shouldClearCanvas, cropRect } = useSelector(
+  const { activeTool, brushSize, color, eraserSize, shouldClearCanvas, cropRect, fillShape } = useSelector(
     (state: RootState) => state.tools
   );
-  const { canvasWidth, canvasHeight, backgroundColor, imageOffset } = useSelector(
+  const { canvasWidth, canvasHeight, backgroundColor } = useSelector(
     (state: RootState) => state.project
   );
   const { selectedLayerId, layers } = useSelector((state: RootState) => state.layers);
@@ -96,18 +93,18 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
 
     const pos = getMousePos(e);
 
-    // MODE MOVE: déplacer l'image
-    if (activeTool === 'move') {
-      isDragging.current = true;
-      dragStart.current = { x: pos.x - imageOffset.x, y: pos.y - imageOffset.y };
-      return;
-    }
-
-    // MODE SELECT: démarrer la sélection
-    if (activeTool === 'select') {
-      isDrawing.current = true;
-      startPos.current = pos;
-      dispatch(setSelectionRect(null));
+    // COLOR PICKER: prélever la couleur au pixel cliqué
+    if (activeTool === 'colorPicker') {
+      const ctx = getActiveContext();
+      if (ctx) {
+        const canvas = document.getElementById(selectedLayerId) as HTMLCanvasElement;
+        if (canvas) {
+          const imageData = ctx.getImageData(pos.x, pos.y, 1, 1);
+          const [r, g, b] = imageData.data;
+          const hexColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+          dispatch(setColor(hexColor));
+        }
+      }
       return;
     }
 
@@ -140,7 +137,7 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
     }
-  }, [activeTool, getActiveContext, getMousePos, selectedLayerId, canvasWidth, canvasHeight, imageOffset, dispatch]);
+  }, [activeTool, getActiveContext, getMousePos, selectedLayerId, canvasWidth, canvasHeight, dispatch]);
 
   /**
    * Gestion du mousemove
@@ -149,25 +146,6 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
     if (!selectedLayerId) return;
 
     const pos = getMousePos(e);
-
-    // MODE MOVE: déplacer
-    if (activeTool === 'move' && isDragging.current && dragStart.current) {
-      const newX = pos.x - dragStart.current.x;
-      const newY = pos.y - dragStart.current.y;
-      dispatch(setImageOffset({ x: newX, y: newY }));
-      return;
-    }
-
-    // MODE SELECT: dessiner le rectangle de sélection
-    if (activeTool === 'select' && isDrawing.current && startPos.current) {
-      dispatch(setSelectionRect({
-        x: startPos.current.x,
-        y: startPos.current.y,
-        width: pos.x - startPos.current.x,
-        height: pos.y - startPos.current.y
-      }));
-      return;
-    }
 
     // MODE CROP: dessiner le rectangle de crop
     if (activeTool === 'crop' && isDrawing.current && startPos.current) {
@@ -233,9 +211,15 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
       ctx.putImageData(savedImageData.current, 0, 0);
       const width = pos.x - startPos.current.x;
       const height = pos.y - startPos.current.y;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = brushSize;
-      ctx.strokeRect(startPos.current.x, startPos.current.y, width, height);
+      
+      if (fillShape) {
+        ctx.fillStyle = color;
+        ctx.fillRect(startPos.current.x, startPos.current.y, width, height);
+      } else {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = brushSize;
+        ctx.strokeRect(startPos.current.x, startPos.current.y, width, height);
+      }
     }
     
     // CIRCLE: preview en temps réel
@@ -245,9 +229,15 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
       const radiusY = Math.abs(pos.y - startPos.current.y);
       ctx.beginPath();
       ctx.ellipse(startPos.current.x, startPos.current.y, radiusX, radiusY, 0, 0, 2 * Math.PI);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = brushSize;
-      ctx.stroke();
+      
+      if (fillShape) {
+        ctx.fillStyle = color;
+        ctx.fill();
+      } else {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = brushSize;
+        ctx.stroke();
+      }
     }
     
     // LINE: preview en temps réel
@@ -261,7 +251,7 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
       ctx.lineCap = 'round';
       ctx.stroke();
     }
-  }, [activeTool, color, brushSize, eraserSize, getActiveContext, getMousePos, selectedLayerId, drawSmoothPath, imageOffset, dispatch]);
+  }, [activeTool, color, brushSize, eraserSize, getActiveContext, getMousePos, selectedLayerId, drawSmoothPath, dispatch]);
 
   /**
    * Gestion du mouseup
@@ -294,12 +284,10 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
     }
 
     // Reset de tous les états
-    isDragging.current = false;
     isDrawing.current = false;
     lastPos.current = null;
     startPos.current = null;
     savedImageData.current = null;
-    dragStart.current = null;
     pathPoints.current = [];
     
     const ctx = getActiveContext();
@@ -330,10 +318,8 @@ export const useDrawingEngine = (containerRef: RefObject<HTMLDivElement>) => {
    */
   const getCursor = useCallback(() => {
     switch (activeTool) {
-      case 'move': return 'move';
       case 'brush': return 'crosshair';
       case 'eraser': return 'cell';
-      case 'select': return 'crosshair';
       case 'crop': return 'crosshair';
       case 'rectangle':
       case 'circle':

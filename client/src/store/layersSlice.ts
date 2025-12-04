@@ -80,6 +80,13 @@ const layersSlice = createSlice({
       const [movedLayer] = state.layers.splice(fromIndex, 1);
       state.layers.splice(toIndex, 0, movedLayer);
     },
+    setLayers: (state, action: PayloadAction<Layer[]>) => {
+      state.layers = action.payload;
+      // Select first layer if current selection is invalid
+      if (!state.layers.find(l => l.id === state.selectedLayerId)) {
+        state.selectedLayerId = state.layers[0]?.id || null;
+      }
+    },
   },
 });
 
@@ -92,6 +99,7 @@ export const {
   renameLayer,
   updateLayerData,
   reorderLayers,
+  setLayers,
 } = layersSlice.actions;
 
 export default layersSlice.reducer;
