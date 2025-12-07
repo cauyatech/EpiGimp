@@ -9,6 +9,7 @@ export default function Home() {
             <span className="text-gray-100">EpiGimp</span>
           </h1>
           <p className="text-xl text-gray-400 font-light">Éditeur d'images professionnel</p>
+          <p className="text-md text-gray-500 max-w-2xl mx-auto"> C'est pour test l'areas</p>
         </div>
         <div className="pt-4">
           <Link
