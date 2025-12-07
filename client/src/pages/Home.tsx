@@ -11,6 +11,7 @@ export default function Home() {
           <p className="text-xl text-gray-400 font-light">Éditeur d'images professionnel</p>
           <p className="text-md text-gray-500 max-w-2xl mx-auto"> C'est pour test l'areas</p>
           <p className="text-md text-gray-500 max-w-2xl mx-auto"> C'est pour test l'areas 2</p>
+          <p className="text-md text-gray-500 max-w-2xl mx-auto"> C'est pour test l'areas 3</p>
         </div>
         <div className="pt-4">
           <Link
